@@ -99,6 +99,46 @@ class ExecutionRecord:
         return asdict(self)
 
     @classmethod
+    def from_kutiraai_traces(
+        cls,
+        *,
+        record_id: str,
+        source: SourceRef,
+        workflow_name: str,
+        trigger: str,
+        traces: List[Dict[str, Any]],
+    ) -> "ExecutionRecord":
+        """Wrap existing KutiraAI traces without overstating their detail."""
+
+        events = []
+        for sequence, trace in enumerate(traces):
+            task = trace.get("task")
+            if not task:
+                raise ValueError("KutiraAI traces require a task field")
+            events.append(
+                ExecutionEvent(
+                    sequence=sequence,
+                    event_type="observation",
+                    name=task,
+                    outputs={"task_output": trace.get("output")},
+                    evidence=[
+                        {"kind": "kutiraai_trace_timestamp", "value": trace.get("timestamp")}
+                    ],
+                )
+            )
+        record = cls(
+            record_id=record_id,
+            source=source,
+            workflow_name=workflow_name,
+            trigger=trigger,
+            status="unknown",
+            events=events,
+            metadata={"adapter": "kutiraai-task-trace-v1"},
+        )
+        record.validate()
+        return record
+
+    @classmethod
     def from_dict(cls, payload: Dict[str, Any]) -> "ExecutionRecord":
         source = SourceRef(**payload["source"])
         events = [ExecutionEvent(**event) for event in payload.get("events", [])]

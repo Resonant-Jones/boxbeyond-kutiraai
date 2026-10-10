@@ -4,6 +4,7 @@ from pathlib import Path
 
 from workflow_engine.skill_learning import (
     ExecutionRecord,
+    SourceRef,
     SourceSelection,
     extract_skill_candidates,
 )
@@ -94,6 +95,28 @@ class SkillLearningTests(unittest.TestCase):
         )
         self.assertEqual(
             extract_skill_candidates(records + [failed], SourceSelection(("failed",))),
+            [],
+        )
+
+    def test_existing_kutiraai_task_traces_remain_observations(self):
+        record = ExecutionRecord.from_kutiraai_traces(
+            record_id="legacy-trace",
+            source=SourceRef(kind="kutiraai", locator="trace://legacy/1"),
+            workflow_name="legacy_workflow",
+            trigger="perform the workflow",
+            traces=[
+                {
+                    "task": "summarize",
+                    "output": "private task output",
+                    "timestamp": "2026-10-10T10:00:00+00:00",
+                }
+            ],
+        )
+
+        self.assertEqual(record.status, "unknown")
+        self.assertEqual(record.events[0].event_type, "observation")
+        self.assertEqual(
+            extract_skill_candidates([record], SourceSelection(("legacy-trace",))),
             [],
         )
 

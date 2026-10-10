@@ -6,6 +6,12 @@ agent procedure. This proof of concept adds a portable execution-record format
 and an offline extractor without training model weights or executing generated
 skills.
 
+The package includes a small adapter for the existing KutiraAI trace shape
+(`task`, `output`, and `timestamp`). It wraps those entries as observation events
+with `status: unknown`; because the legacy trace has no tool identity, inputs,
+decisions, or completion evidence, it cannot by itself produce a reusable skill
+candidate. This is an explicit limitation rather than an inferred procedure.
+
 ## Scope
 
 The prototype accepts only an explicit list of `ExecutionRecord` objects. It
