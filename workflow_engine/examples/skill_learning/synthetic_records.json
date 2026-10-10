@@ -1,0 +1,84 @@
+[
+  {
+    "schema_version": "1.0",
+    "record_id": "synthetic-export-001",
+    "source": {"kind": "synthetic", "locator": "fixture://workflow-review/001"},
+    "workflow_name": "review_pull_request",
+    "trigger": "Review a pull request and report whether it is ready.",
+    "status": "success",
+    "events": [
+      {
+        "sequence": 0,
+        "event_type": "tool_call",
+        "name": "fetch_pull_request",
+        "tool": "github.fetch_pull_request",
+        "inputs": {"repository": "example/repo", "pull_request": 42, "authorization": "ghp_SYNTHETIC_SECRET_SHOULD_NOT_SURFACE"},
+        "outputs": {"title": "private review title", "files_changed": 2},
+        "authorization": {"scope": "repository.read"}
+      },
+      {
+        "sequence": 1,
+        "event_type": "tool_call",
+        "name": "fetch_checks",
+        "tool": "github.fetch_checks",
+        "inputs": {"repository": "example/repo", "pull_request": 42},
+        "outputs": {"checks": ["unit", "lint"]},
+        "authorization": {"scope": "repository.read"}
+      },
+      {
+        "sequence": 2,
+        "event_type": "validation",
+        "name": "checks_passed",
+        "evidence": [{"kind": "ci_status", "verified": true}]
+      },
+      {
+        "sequence": 3,
+        "event_type": "completion",
+        "name": "review_reported"
+      }
+    ],
+    "completion_evidence": [{"kind": "review_reported", "verified": true}],
+    "metadata": {"operator_email": "private@example.com"}
+  },
+  {
+    "schema_version": "1.0",
+    "record_id": "synthetic-export-002",
+    "source": {"kind": "synthetic", "locator": "fixture://workflow-review/002"},
+    "workflow_name": "review_pull_request",
+    "trigger": "Review a pull request and report whether it is ready.",
+    "status": "success",
+    "events": [
+      {
+        "sequence": 0,
+        "event_type": "tool_call",
+        "name": "fetch_pull_request",
+        "tool": "github.fetch_pull_request",
+        "inputs": {"repository": "example/repo", "pull_request": 43},
+        "outputs": {"title": "another private review title", "files_changed": 3},
+        "authorization": {"scope": "repository.read"}
+      },
+      {
+        "sequence": 1,
+        "event_type": "tool_call",
+        "name": "fetch_checks",
+        "tool": "github.fetch_checks",
+        "inputs": {"repository": "example/repo", "pull_request": 43},
+        "outputs": {"checks": ["unit", "lint"]},
+        "authorization": {"scope": "repository.read"}
+      },
+      {
+        "sequence": 2,
+        "event_type": "validation",
+        "name": "checks_passed",
+        "evidence": [{"kind": "ci_status", "verified": true}]
+      },
+      {
+        "sequence": 3,
+        "event_type": "completion",
+        "name": "review_reported"
+      }
+    ],
+    "completion_evidence": [{"kind": "review_reported", "verified": true}],
+    "metadata": {"operator_email": "another-private@example.com"}
+  }
+]
